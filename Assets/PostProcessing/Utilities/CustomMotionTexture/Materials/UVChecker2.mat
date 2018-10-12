@@ -1,0 +1,133 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 6
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_Name: UVChecker2
+  m_Shader: {fileID: 46, guid: 0000000000000000f000000000000000, type: 0}
+  m_ShaderKeywords: GLOBAL_FADE REFL _EMISSION
+  m_LightmapFlags: 1
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _BumpMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailAlbedo:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailAlbedoMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailMask:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailNormal:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _DetailNormalMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _EmissionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Lightmap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: 3ce8f20c76a25a344aa0912f9f1c0571, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Masks:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MetallicGlossMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NormalTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _OcclusionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ParallaxMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Selfillum:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Floats:
+    - _AlphaClip: 0.5
+    - _AlphaTest: 0
+    - _BumpScale: 1
+    - _CanFade: 0
+    - _Cull: 2
+    - _Cutoff: 0.5
+    - _DetailAlbedoIntensity: 1
+    - _DetailAlbedoScale: 1
+    - _DetailNormalIntensity: 1
+    - _DetailNormalMapScale: 1
+    - _DetailNormalScale: 1
+    - _DetailUv2: 0
+    - _DirectOcclusion: 0
+    - _DstBlend: 0
+    - _Emissive: 1
+    - _Fade: 0.5
+    - _Fresnel: 0.15
+    - _GlobalFade: 1
+    - _Gloss: 0.1
+    - _GlossMapScale: 1
+    - _Glossiness: 0.376
+    - _GlossyReflections: 1
+    - _LightGroupA: 0
+    - _LightGroupB: 0
+    - _MaskUv2: 0
+    - _Metallic: 0
+    - _Metalness: 0
+    - _Mode: 0
+    - _NormalMap: 0
+    - _Occlusion: 0.9
+    - _OcclusionStrength: 1
+    - _Parallax: 0.02
+    - _PerPixelFog: 0
+    - _RainFlatness: 0
+    - _RainIntensity: 1
+    - _Refl: 1
+    - _ReflMasking: 0
+    - _ReflOcclusion: 0.9
+    - _Reflections: 1
+    - _SmoothnessTextureChannel: 0
+    - _Spec: 0.05
+    - _SpecularHighlights: 1
+    - _SrcBlend: 1
+    - _Temperature: 1
+    - _UVSec: 0
+    - _UseDetailAlbedo: 0
+    - _UseLightmap: 0
+    - _VertexColors: 0
+    - _ZWrite: 1
+    m_Colors:
+    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}

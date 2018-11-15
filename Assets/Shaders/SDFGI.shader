@@ -24,6 +24,7 @@ Shader "Effects/SDFGI"
 
 			#define M_PI 3.14159265359
 			#define M_2PI 6.28318530718
+			#define M_EPS 0.0000001
 
 			#define RAY_DIRECTIONAL_OFFSET 0.01
 			#define IMPORTANCE_SAMPLING
@@ -101,6 +102,67 @@ Shader "Effects/SDFGI"
 				return o;
 			}
 
+			#define _LightPos float3(0, 2.75, 0)
+			#define _LightSpan float3(0.5, 0, 0.5)
+			#define _LightColor float3(1, 1, 1)
+
+			// Get a random position on the light source
+			float3 LightPosition (float2 r)
+			{
+				float3 pos = _LightPos;
+				pos.x += _LightSpan.x * (r.x-0.5);
+				pos.z += _LightSpan.z * (r.y-0.5);
+				return pos;
+			}
+
+			bool IntersectsTriangle (Ray ray, float3 v0, float3 v1, float3 v2, out float3 intersection)
+			{
+				float3 ro = ray.origin;
+				float3 rd = ray.direction;
+
+			    float3 edge1, edge2, h, s, q;
+			    float a,f,u,v;
+			    edge1 = v1 - v0;
+			    edge2 = v2 - v0;
+				h = cross(rd, edge2);
+				a = dot(edge1, h);
+			    if (a > -M_EPS && a < M_EPS)
+			        return false;
+			    f = 1/a;
+			    s = ro - v0;
+			    u = f * dot(s, h);
+
+			    if (u < 0.0 || u > 1.0)
+			        return false;
+
+			    q = cross(s, edge1);
+			    v = f * dot(rd, q);
+			    if (v < 0.0 || u + v > 1.0)
+			        return false;
+
+			    // At this stage we can compute t to find out where the intersection point is on the line.
+			    float t = f * dot(edge2, q);
+			    if (t > M_EPS) // ray intersection
+			    {
+			        intersection = ro + rd * t; 
+			        return true;
+			    }
+			    else // This means that there is a line intersection but not a ray intersection.
+			        return false;
+			}
+
+			bool IntersectsLight (Ray ray, out float3 intersectionPos)
+			{
+				float3 v0 = _LightPos + _LightSpan * float3( 1, 0, 1 );
+				float3 v1 = _LightPos + _LightSpan * float3( 1, 0,-1 );
+				float3 v2 = _LightPos + _LightSpan * float3(-1, 0,-1 );
+				float3 v3 = _LightPos + _LightSpan * float3(-1, 0, 1 );
+				bool hit = IntersectsTriangle(ray, v0, v1, v2, intersectionPos);
+				if (hit)
+					return true;
+				return IntersectsTriangle(ray, v0, v2, v3, intersectionPos);
+			}
+
 			// Function representing the scene geometry
 			SDFO map (float3 p)
 			{
@@ -116,12 +178,13 @@ Shader "Effects/SDFGI"
 				// Ceiling
 				scene = opU(scene, SDFObject(sdBox(p - float3( 0,  3.1, 0 ), float3(3, 0.2, 3)), MAT_DIFFUSE, float3(1, 1, 1), 0.05, 0));
 				// Ceiling hole
-				scene = opS(scene, SDFObject(sdBox(p - float3( 0,  3.1, 0 ), float3(2, 0.3, 2)), MAT_DIFFUSE, float3(1, 1, 1), 0.05, 0));
+				// scene = opS(scene, SDFObject(sdBox(p - float3( 0,  3.1, 0 ), float3(1, 0.3, 1)), MAT_DIFFUSE, float3(1, 1, 1), 0.05, 0));
 
 				// Spheres
 				// scene = opU(scene, SDFObject(sdSphere(p - float3(-0.5, 0.5, 0.5), 0.5), MAT_DIFFUSE, float3(0, 0, 0), 1, 0.0));
 				// scene = opU(scene, SDFObject(sdSphere(p - float3(-0.5, 0.5, 0.5), 0.5), MAT_DIFFUSE, float3(0, 0, 0), 1, 0.0));
-				scene = opU(scene, SDFObject(sdSphere(p - float3(-0.5, 0.5, 0.5), 0.5), MAT_DIFFUSE, float3(0, 0, 1), 0.15, 0.0));
+				scene = opU(scene, SDFObject(sdSphere(p - float3(-0.5, 0.5, 0.5), 0.5), MAT_DIFFUSE, float3(0, 0, 1), 0.05, 0.0));
+				// scene = opU(scene, SDFObject(sdSphere(p - float3(0, 1.5, 0), 0.5), MAT_DIFFUSE, float3(1, 0, 0), 0.05, 0.0));
 				scene = opU(scene, SDFObject(sdSphere(p - float3(0.5, 0.5, 0.5), 0.5), MAT_DIFFUSE, float3(1, 0, 0), 1, 0.0));
 				// scene = opU(scene, SDFObject(sdSphere(p - float3(1.5, 3.5, 1.5), 0.5), MAT_DIFFUSE, float3(0, 0, 1), 0.05, 0.1));
 
@@ -379,9 +442,24 @@ Shader "Effects/SDFGI"
 				float3 luminance = 1.0;
 				float3 direct = 0;
 
+				bool nextRefl = false;
+
+				UNITY_LOOP
 				for (int i = 0; i < 3; i++)
 				{
-					if (raymarch(ray, surface))
+					bool hit = raymarch(ray, surface);
+
+					float3 intersectionPos;
+					if (IntersectsLight(ray, intersectionPos) && (i == 0 || nextRefl))
+					{
+						float lightDist = length(intersectionPos - surface.position);
+						
+						if (!hit || length(ray.origin - surface.position) > lightDist)
+							return _LightColor;
+						// direct += luminance * _LightColor;
+					}
+					
+					if (hit)
 					{
 						// Specular reflection
 						float fresnel = max(-dot(ray.direction, surface.normal), 0);
@@ -393,20 +471,23 @@ Shader "Effects/SDFGI"
 						float specular = lerp(fresnel, 1, f0);
 						bool reflection = rand2(uv + i + _Random.xy).x <= specular;
 
-						if (surface.id == MAT_LIGHT)
-						{
-							// Ray hit a light source
-							direct += luminance * surface.albedo;
-						}
-						else
+						// if (surface.id == MAT_LIGHT)
+						// {
+						// 	// Ray hit a light source
+						// 	direct += luminance * surface.albedo;
+						// 	// direct += surface.albedo;
+						// }
+						// else
 						{
 							if (reflection)
 							{
+								nextRefl = true;
 								// Specular reflection
 								ray.direction = lerp(reflect(ray.direction, surface.normal), WeightedHemisphereDir(surface.normal, uv+i), surface.roughness);
 							}
 							else
 							{
+								nextRefl = false;
 								// Diffuse reflection
 								#if defined(IMPORTANCE_SAMPLING)
 									// Biased sampling (cosine weighted):
@@ -418,7 +499,8 @@ Shader "Effects/SDFGI"
 
 									float  PDF  = costh / M_PI;
 									float3 BRDF = surface.albedo / M_PI;
-									luminance *= 2.0 * BRDF * costh / PDF;
+									// luminance *= 2.0 * BRDF * costh / PDF;
+									luminance *= surface.albedo * costh;
 								#else
 									// Unbiased sampling:
 									// PDF = 1/(2*PI), BRDF = Albedo/PI
@@ -436,11 +518,41 @@ Shader "Effects/SDFGI"
 
 						ray.origin = surface.position + surface.normal * RAY_DIRECTIONAL_OFFSET; // new start point
 
+						// Light tracing
+						
+						if (reflection)
+						{
+
+						}
+						else
+						{
+							float3 lightPos = LightPosition(rand2(uv + i + _Random.xy));
+							float3 lightDir = lightPos - surface.position;
+							float lightDist = length(lightDir);
+							lightDir /= lightDist;
+							
+							Surface hitSurface;
+							bool hit = raymarch(NewRay(ray.origin, lightDir), hitSurface);
+							if (!hit || length(ray.origin - hitSurface.position) > lightDist)
+							{
+								float costh = max(dot(lightDir, surface.normal), 0);
+									
+								const float PDF = 1 / M_2PI;
+								float3 BRDF = surface.albedo / M_PI;
+
+								// direct += luminance * 2.0 * BRDF * costh / PDF * _LightColor;
+								direct += luminance * costh * _LightColor;
+								// direct += luminance * costh * _LightColor;
+							}						
+						}
+						
+
+						/* // Disable sun lighting for now
 						// Direct lighting (sun)
 						float3 sunSampleDir = -getConeSample(_SunDir, SUN_SIZE, uv);
 						if (reflection)
 						{
-							
+
 						}
 						else
 						{
@@ -453,6 +565,7 @@ Shader "Effects/SDFGI"
 								// direct += 1E-5 * SUN_COLOR;
 							}
 						}
+						*/
 					}
 					else
 					{

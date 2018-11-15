@@ -121,13 +121,13 @@ Shader "Effects/SDFGI"
 				// Spheres
 				// scene = opU(scene, SDFObject(sdSphere(p - float3(-0.5, 0.5, 0.5), 0.5), MAT_DIFFUSE, float3(0, 0, 0), 1, 0.0));
 				// scene = opU(scene, SDFObject(sdSphere(p - float3(-0.5, 0.5, 0.5), 0.5), MAT_DIFFUSE, float3(0, 0, 0), 1, 0.0));
-				scene = opU(scene, SDFObject(sdSphere(p - float3(-0.5, 0.5, 0.5), 0.5), MAT_DIFFUSE, float3(0, 0, 1), 0.05, 0.1));
+				scene = opU(scene, SDFObject(sdSphere(p - float3(-0.5, 0.5, 0.5), 0.5), MAT_DIFFUSE, float3(0, 0, 1), 0.15, 0));
 				scene = opU(scene, SDFObject(sdSphere(p - float3(0.5, 0.5, 0.5), 0.5), MAT_DIFFUSE, float3(1, 0, 0), 0.05, 0.1));
 				// scene = opU(scene, SDFObject(sdSphere(p - float3(1.5, 3.5, 1.5), 0.5), MAT_DIFFUSE, float3(0, 0, 1), 0.05, 0.1));
 
 				// Light
 				// scene = opU(scene, SDFObject(sdSphere(p - float3(0, 0.15, -0.1), 0.15), MAT_LIGHT, float3(1, 0.9, 0.6) * 4, 0.05, 0.1));
-				// scene = opU(scene, SDFObject(sdBox(p - float3( 0, 3.0, 0 ), float3(1, 0.1, 1)), MAT_LIGHT, float3(1, 1, 1) * 10, 0.05, 0));
+				// scene = opU(scene, SDFObject(sdBox(p - float3( 0, 3.0, 0 ), float3(1, 1, 1)), MAT_LIGHT, float3(1, 1, 1) * 10, 0.05, 0));
 				// scene = opU(scene, SDFObject(sdBox(p - float3( 1.5, 1.5, 1.5 ), float3(0.1, 3, 0.1)), MAT_LIGHT, float3(1, 1, 1) * 10, 0.05, 0));
 				// scene = opU(scene, SDFObject(sdBox(p - float3(-1.5, 1.5, 1.5 ), float3(0.1, 3, 0.1)), MAT_LIGHT, float3(1, 1, 1) * 10, 0.05, 0));
 				// scene = opU(scene, SDFObject(sdBox(p - float3(-1.5, 1.5,-1.5 ), float3(0.1, 3, 0.1)), MAT_LIGHT, float3(1, 1, 1) * 10, 0.05, 0));
@@ -390,30 +390,47 @@ Shader "Effects/SDFGI"
 						}
 						else
 						{
-							// Ray hit something
-							#if defined(IMPORTANCE_SAMPLING)
-								// Biased sampling (cosine weighted):
-								// PDF = CosAngle / PI, BRDF = Albedo/PI
+							// Specular reflection
+							float fresnel = max(-dot(ray.direction, surface.normal), 0);
+							fresnel = 1 - fresnel;
+							fresnel = pow(fresnel, 5);
+							// Reflectance at 0 degrees
+							float f0 = surface.specular;
+							// Final specular term
+							float specular = lerp(fresnel, 1, f0);
 
-								ray.direction = WeightedHemisphereDir(surface.normal, uv+i); // Offset 
+							if (rand2(uv + i + _Random.xy).x < specular)
+							{
+								// Specular reflection
+								ray.direction = lerp(reflect(ray.direction, surface.normal), WeightedHemisphereDir(surface.normal, uv+i), surface.roughness);
+							}
+							else
+							{
+								// Diffuse reflection
+								#if defined(IMPORTANCE_SAMPLING)
+									// Biased sampling (cosine weighted):
+									// PDF = CosAngle / PI, BRDF = Albedo/PI
 
-								float costh = max(dot(ray.direction, surface.normal), 0);
+									ray.direction = WeightedHemisphereDir(surface.normal, uv+i); // Offset 
 
-								float  PDF  = costh / M_PI;
-								float3 BRDF = surface.albedo / M_PI;
-								luminance *= 2.0 * BRDF * costh / PDF;
-							#else
-								// Unbiased sampling:
-								// PDF = 1/(2*PI), BRDF = Albedo/PI
+									float costh = max(dot(ray.direction, surface.normal), 0);
 
-								ray.direction = HemisphereDir(surface.normal, uv+i);
+									float  PDF  = costh / M_PI;
+									float3 BRDF = surface.albedo / M_PI;
+									luminance *= 2.0 * BRDF * costh / PDF;
+								#else
+									// Unbiased sampling:
+									// PDF = 1/(2*PI), BRDF = Albedo/PI
 
-								float costh = max(dot(ray.direction, surface.normal), 0);
-								
-								const float PDF = 1 / M_2PI;
-								float3 BRDF = surface.albedo / M_PI;
-								luminance *= 2.0 * BRDF * costh / PDF;
-							#endif
+									ray.direction = HemisphereDir(surface.normal, uv+i);
+
+									float costh = max(dot(ray.direction, surface.normal), 0);
+									
+									const float PDF = 1 / M_2PI;
+									float3 BRDF = surface.albedo / M_PI;
+									luminance *= 2.0 * BRDF * costh / PDF;
+								#endif
+							}
 						}
 
 						ray.origin = surface.position + surface.normal * RAY_DIRECTIONAL_OFFSET; // new start point
@@ -464,53 +481,6 @@ Shader "Effects/SDFGI"
 				ray.direction = normalize(focalPoint - ray.origin);
 
 				float3 color = Luminance(ray, uv);
-
-				/*
-				// Initial sample
-				Surface surface;
-				UNITY_BRANCH
-				if (raymarch(ray, surface))
-				{
-					// Direct lighting
-					color += Luminance(surface, uv);
-
-					// Specular reflection
-					float fresnel = max(-dot(ray.direction, surface.normal), 0);
-					fresnel = 1 - fresnel;
-					fresnel = pow(fresnel, 5);
-					// Reflectance at 0 degrees
-					float f0 = surface.specular;
-					// Final specular term
-					float specular = lerp(fresnel, 1, f0);
-					Ray ray2;
-					ray2.origin = surface.position;
-					float3 reflDir = reflect(ray.direction, surface.normal);
-					reflDir = lerp(reflDir, HemisphereDir(reflDir, i.texcoord.xy), surface.roughness);
-					ray2.direction = reflDir;
-					ray2.origin += ray2.direction * RAY_DIRECTIONAL_OFFSET;
-					Surface reflectionSurface;
-					if (raymarch(ray2, reflectionSurface))
-					{
-						// Reflection
-						// color += Luminance(reflectionSurface, uv) * specular;
-					}
-					else
-					{
-						// Sky reflection
-						// color += Ambient(ray2.direction) * specular;
-
-						// Sun reflection
-						// color += Sun(ray2.direction) * specular;
-					}
-				}
-				else
-				{
-					// Sky
-					color += Ambient(ray.direction);
-					// Sun
-					color += Sun(ray.direction);
-				}
-				*/
 
 				float delta = saturate(1.0 / (_IntegrationCount+1));
 

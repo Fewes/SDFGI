@@ -121,8 +121,8 @@ Shader "Effects/SDFGI"
 				// Spheres
 				// scene = opU(scene, SDFObject(sdSphere(p - float3(-0.5, 0.5, 0.5), 0.5), MAT_DIFFUSE, float3(0, 0, 0), 1, 0.0));
 				// scene = opU(scene, SDFObject(sdSphere(p - float3(-0.5, 0.5, 0.5), 0.5), MAT_DIFFUSE, float3(0, 0, 0), 1, 0.0));
-				scene = opU(scene, SDFObject(sdSphere(p - float3(-0.5, 0.5, 0.5), 0.5), MAT_DIFFUSE, float3(0, 0, 1), 0.15, 0));
-				scene = opU(scene, SDFObject(sdSphere(p - float3(0.5, 0.5, 0.5), 0.5), MAT_DIFFUSE, float3(1, 0, 0), 0.05, 0.1));
+				scene = opU(scene, SDFObject(sdSphere(p - float3(-0.5, 0.5, 0.5), 0.5), MAT_DIFFUSE, float3(0, 0, 1), 0.15, 0.0));
+				scene = opU(scene, SDFObject(sdSphere(p - float3(0.5, 0.5, 0.5), 0.5), MAT_DIFFUSE, float3(1, 0, 0), 1, 0.0));
 				// scene = opU(scene, SDFObject(sdSphere(p - float3(1.5, 3.5, 1.5), 0.5), MAT_DIFFUSE, float3(0, 0, 1), 0.05, 0.1));
 
 				// Light

@@ -383,6 +383,16 @@ Shader "Effects/SDFGI"
 				{
 					if (raymarch(ray, surface))
 					{
+						// Specular reflection
+						float fresnel = max(-dot(ray.direction, surface.normal), 0);
+						fresnel = 1 - fresnel;
+						fresnel = pow(fresnel, 5);
+						// Reflectance at 0 degrees
+						float f0 = surface.specular;
+						// Final specular term
+						float specular = lerp(fresnel, 1, f0);
+						bool reflection = rand2(uv + i + _Random.xy).x <= specular;
+
 						if (surface.id == MAT_LIGHT)
 						{
 							// Ray hit a light source
@@ -390,16 +400,7 @@ Shader "Effects/SDFGI"
 						}
 						else
 						{
-							// Specular reflection
-							float fresnel = max(-dot(ray.direction, surface.normal), 0);
-							fresnel = 1 - fresnel;
-							fresnel = pow(fresnel, 5);
-							// Reflectance at 0 degrees
-							float f0 = surface.specular;
-							// Final specular term
-							float specular = lerp(fresnel, 1, f0);
-
-							if (rand2(uv + i + _Random.xy).x < specular)
+							if (reflection)
 							{
 								// Specular reflection
 								ray.direction = lerp(reflect(ray.direction, surface.normal), WeightedHemisphereDir(surface.normal, uv+i), surface.roughness);
@@ -437,13 +438,20 @@ Shader "Effects/SDFGI"
 
 						// Direct lighting (sun)
 						float3 sunSampleDir = -getConeSample(_SunDir, SUN_SIZE, uv);
-						// float3 sunSampleDir = -_SunDir;
-						float sunLight = dot(surface.normal, sunSampleDir);
-						if (sunLight > 0 && !raymarch(NewRay(ray.origin, sunSampleDir)))
+						if (reflection)
 						{
-							// direct += luminance * sunLight * 1E-5 * SUN_COLOR * 100;
-							direct += luminance * sunLight * 1E-5 * SUN_COLOR * 100;
-							// direct += 1E-5 * SUN_COLOR;
+							
+						}
+						else
+						{
+							// float3 sunSampleDir = -_SunDir;
+							float sunLight = dot(surface.normal, sunSampleDir);
+							if (sunLight > 0 && !raymarch(NewRay(ray.origin, sunSampleDir)))
+							{
+								// direct += luminance * sunLight * 1E-5 * SUN_COLOR * 100;
+								direct += luminance * sunLight * 1E-5 * SUN_COLOR * 100;
+								// direct += 1E-5 * SUN_COLOR;
+							}
 						}
 					}
 					else

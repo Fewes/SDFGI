@@ -104,7 +104,7 @@ Shader "Effects/SDFGI"
 
 			#define _LightPos float3(0, 2.75, 0)
 			#define _LightSpan float3(0.5, 0, 0.5)
-			#define _LightColor float3(1, 1, 1)
+			#define _LightColor float3(250, 208, 148) / 255 * 0.15
 
 			// Get a random position on the light source
 			float3 LightPosition (float2 r)
@@ -166,25 +166,42 @@ Shader "Effects/SDFGI"
 			// Function representing the scene geometry
 			SDFO map (float3 p)
 			{
+				float wall_roughness = 0.5;
 				SDFO scene = SDFObject(99999999, 0, 0, 0, 0);
 				// Walls
-				scene = opU(scene, SDFObject(sdBox(p - float3( 1.6, 1.5, 0 ), float3(0.2, 3, 3)), MAT_DIFFUSE, float3(0, 1, 0), 0.05, 0.5));
-				scene = opU(scene, SDFObject(sdBox(p - float3(-1.6, 1.5, 0 ), float3(0.2, 3, 3)), MAT_DIFFUSE, float3(1, 0, 0), 0.05, 0.5));
-				scene = opU(scene, SDFObject(sdBox(p - float3( 0, 1.5, 1.6 ), float3(3, 3, 0.2)), MAT_DIFFUSE, float3(1, 1, 1), 0.05, 0.5));
-				scene = opU(scene, SDFObject(sdBox(p - float3( 0, 1.5,-1.6 ), float3(3, 3, 0.2)), MAT_DIFFUSE, float3(1, 1, 1), 0.05, 0.5));
+				scene = opU(scene, SDFObject(sdBox(p - float3( 1.6, 1.5, 0 ), float3(0.2, 3, 3)), MAT_DIFFUSE, float3(0, 1, 0), 0.05, wall_roughness));
+				scene = opU(scene, SDFObject(sdBox(p - float3(-1.6, 1.5, 0 ), float3(0.2, 3, 3)), MAT_DIFFUSE, float3(1, 0, 0), 0.05, wall_roughness));
+				scene = opU(scene, SDFObject(sdBox(p - float3( 0, 1.5, 1.6 ), float3(3, 3, 0.2)), MAT_DIFFUSE, float3(1, 1, 1), 0.05, wall_roughness));
+				scene = opU(scene, SDFObject(sdBox(p - float3( 0, 1.5,-1.6 ), float3(3, 3, 0.2)), MAT_DIFFUSE, float3(1, 1, 1), 0.05, wall_roughness));
+				
+				// // Window holes
+				// scene = opS(scene, SDFObject(sdBox(p - float3( 1.6, 2.1,  0.6 ), float3(0.3, 1, 1)), MAT_DIFFUSE, float3(0, 1, 0), 0.05, wall_roughness));
+				// scene = opS(scene, SDFObject(sdBox(p - float3( 1.6, 0.9,  0.6 ), float3(0.3, 1, 1)), MAT_DIFFUSE, float3(0, 1, 0), 0.05, wall_roughness));
+				// scene = opS(scene, SDFObject(sdBox(p - float3( 1.6, 2.1, -0.6 ), float3(0.3, 1, 1)), MAT_DIFFUSE, float3(0, 1, 0), 0.05, wall_roughness));
+				// scene = opS(scene, SDFObject(sdBox(p - float3( 1.6, 0.9, -0.6 ), float3(0.3, 1, 1)), MAT_DIFFUSE, float3(0, 1, 0), 0.05, wall_roughness));
+
+				// scene = opS(scene, SDFObject(sdBox(p - float3(-1.6, 2.1,  0.6 ), float3(0.3, 1, 1)), MAT_DIFFUSE, float3(0, 1, 0), 0.05, wall_roughness));
+				// scene = opS(scene, SDFObject(sdBox(p - float3(-1.6, 0.9,  0.6 ), float3(0.3, 1, 1)), MAT_DIFFUSE, float3(0, 1, 0), 0.05, wall_roughness));
+				// scene = opS(scene, SDFObject(sdBox(p - float3(-1.6, 2.1, -0.6 ), float3(0.3, 1, 1)), MAT_DIFFUSE, float3(0, 1, 0), 0.05, wall_roughness));
+				// scene = opS(scene, SDFObject(sdBox(p - float3(-1.6, 0.9, -0.6 ), float3(0.3, 1, 1)), MAT_DIFFUSE, float3(0, 1, 0), 0.05, wall_roughness));
+				
+				// scene = opS(scene, SDFObject(sdBox(p - float3(-1.6, 1.5, 0 ), float3(0.3, 2, 2)), MAT_DIFFUSE, float3(0, 1, 0), 0.05, wall_roughness));
+
+				// Capsule
+				// scene = opU(scene, SDFObject(sdCapsule(p - float3( .5, 0.75, .5 ), float3(0,-.5, 0), float3(0, .5, 0), 0.25), MAT_DIFFUSE, float3(1, 1, 1), 0.05, wall_roughness));
 
 				// Floor
-				scene = opU(scene, SDFObject(sdBox(p - float3( 0, -0.1, 0 ), float3(3, 0.2, 3)), MAT_DIFFUSE, float3(1, 1, 1), 0.05, 0.5));
+				scene = opU(scene, SDFObject(sdBox(p - float3( 0, -0.1, 0 ), float3(3, 0.2, 3)), MAT_DIFFUSE, float3(1, 1, 1), 0.05, wall_roughness));
 				// Ceiling
-				scene = opU(scene, SDFObject(sdBox(p - float3( 0,  3.1, 0 ), float3(3, 0.2, 3)), MAT_DIFFUSE, float3(1, 1, 1), 0.05, 0));
+				scene = opU(scene, SDFObject(sdBox(p - float3( 0,  3.1, 0 ), float3(3, 0.2, 3)), MAT_DIFFUSE, float3(1, 1, 1), 0.05, wall_roughness));
 				// Ceiling hole
-				// scene = opS(scene, SDFObject(sdBox(p - float3( 0,  3.1, 0 ), float3(1, 0.3, 1)), MAT_DIFFUSE, float3(1, 1, 1), 0.05, 0));
+				// scene = opS(scene, SDFObject(sdBox(p - float3( 0,  3.1, 0 ), float3(1, 0.3, 1)), MAT_DIFFUSE, float3(1, 1, 1), 0.05, wall_roughness));
 
 				// Spheres
 				// scene = opU(scene, SDFObject(sdSphere(p - float3(-0.5, 0.5, 0.5), 0.5), MAT_DIFFUSE, float3(0, 0, 0), 1, 0.0));
 				// scene = opU(scene, SDFObject(sdSphere(p - float3(-0.5, 0.5, 0.5), 0.5), MAT_DIFFUSE, float3(0, 0, 0), 1, 0.0));
 				scene = opU(scene, SDFObject(sdSphere(p - float3(-0.5, 0.5, 0.5), 0.5), MAT_DIFFUSE, float3(0, 0, 1), 0.05, 0.0));
-				// scene = opU(scene, SDFObject(sdSphere(p - float3(0, 1.5, 0), 0.5), MAT_DIFFUSE, float3(1, 0, 0), 0.05, 0.0));
+				scene = opU(scene, SDFObject(sdSphere(p - float3(0, 1.5, 0.5), 0.5), MAT_DIFFUSE, float3(1, 0, 0), 0.05, 0.0));
 				scene = opU(scene, SDFObject(sdSphere(p - float3(0.5, 0.5, 0.5), 0.5), MAT_DIFFUSE, float3(1, 0, 0), 1, 0.0));
 				// scene = opU(scene, SDFObject(sdSphere(p - float3(1.5, 3.5, 1.5), 0.5), MAT_DIFFUSE, float3(0, 0, 1), 0.05, 0.1));
 
@@ -445,7 +462,7 @@ Shader "Effects/SDFGI"
 				bool nextRefl = false;
 
 				UNITY_LOOP
-				for (int i = 0; i < 3; i++)
+				for (int i = 0; i < 5; i++)
 				{
 					bool hit = raymarch(ray, surface);
 
@@ -455,7 +472,7 @@ Shader "Effects/SDFGI"
 						float lightDist = length(intersectionPos - surface.position);
 						
 						if (!hit || length(ray.origin - surface.position) > lightDist)
-							return _LightColor;
+							return _LightColor * 2;
 						// direct += luminance * _LightColor;
 					}
 					
@@ -511,7 +528,8 @@ Shader "Effects/SDFGI"
 									
 									const float PDF = 1 / M_2PI;
 									float3 BRDF = surface.albedo / M_PI;
-									luminance *= 2.0 * BRDF * costh / PDF;
+									// luminance *= 2.0 * BRDF * costh / PDF;
+									luminance *= surface.albedo * costh;
 								#endif
 							}
 						}
@@ -547,7 +565,7 @@ Shader "Effects/SDFGI"
 						}
 						
 
-						/* // Disable sun lighting for now
+						 // Disable sun lighting for now
 						// Direct lighting (sun)
 						float3 sunSampleDir = -getConeSample(_SunDir, SUN_SIZE, uv);
 						if (reflection)
@@ -565,7 +583,7 @@ Shader "Effects/SDFGI"
 								// direct += 1E-5 * SUN_COLOR;
 							}
 						}
-						*/
+						
 					}
 					else
 					{

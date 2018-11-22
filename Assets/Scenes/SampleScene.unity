@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44053167, g: 0.4891489, b: 0.5692961, a: 1}
+  m_IndirectSpecularColor: {r: 0.4451446, g: 0.48901618, b: 0.54289573, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -233,13 +233,13 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 170076733}
-  m_LocalRotation: {x: 0.5269352, y: -0.26053786, z: 0.17375714, w: 0.7901061}
+  m_LocalRotation: {x: 0.13750346, y: -0.61748415, z: 0.03494081, w: 0.77368295}
   m_LocalPosition: {x: 0, y: 3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 67.4, y: -36.5, z: 0}
+  m_LocalEulerAnglesHint: {x: 14.828001, y: -78.083, z: -6.8770003}
 --- !u!1 &534669902
 GameObject:
   m_ObjectHideFlags: 0
@@ -278,9 +278,9 @@ Camera:
   m_ClearFlags: 1
   m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
   m_projectionMatrixMode: 2
-  m_SensorSize: {x: 10, y: 10}
+  m_SensorSize: {x: 4, y: 3}
   m_LensShift: {x: 0, y: 0}
-  m_FocalLength: 4.6625752
+  m_FocalLength: 1.4485332
   m_NormalizedViewPortRect:
     serializedVersion: 2
     x: 0
@@ -289,7 +289,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 94
+  field of view: 92
   orthographic: 0
   orthographic size: 5
   m_Depth: -1

@@ -1,2 +1,1 @@
-# SDFGI
 ![Render](Render.png)
